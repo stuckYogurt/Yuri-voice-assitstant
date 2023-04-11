@@ -348,30 +348,32 @@ class Worker(QtCore.QObject):
                 music.stop_audio()
                 music.isInQueue = False
             files = music.list_audio_files('music')
-            if not music.isInQueue:
-                call(["python3", "tts.py", 'проигрываю плейлист'])
-                self.globalizator('проигрываю плейлист...')
+            if files==[]: print('Error: no music files found')
+            else:
+                if not music.isInQueue:
+                    call(["python3", "tts.py", 'проигрываю плейлист'])
+                    self.globalizator('проигрываю плейлист...')
 
-                def musicPlaying():
-                    music.isInQueue = True
-                    for i in files:
-                        if not music.isInQueue:
-                            break
-
-                        music.play_audio(i)
-                        last_volume = float(configer['Generals']['music-volume'])
-                        while True:
-                            if not music.mixer.music.get_busy() and music.playing or not music.mixer.music.get_busy() and music.skip:
-                                music.skip = False
+                    def musicPlaying():
+                        music.isInQueue = True
+                        for i in files:
+                            if not music.isInQueue:
                                 break
-                            else:
-                                if last_volume != float(configer['Generals']['music-volume']):
-                                    last_volume = float(configer['Generals']['music-volume'])
-                                    music.mixer.music.set_volume(last_volume)
-                                time.sleep(2)
 
-                t = threading.Thread(target=musicPlaying)
-                t.start()
+                            music.play_audio(i)
+                            last_volume = float(configer['Generals']['music-volume'])
+                            while True:
+                                if not music.mixer.music.get_busy() and music.playing or not music.mixer.music.get_busy() and music.skip:
+                                    music.skip = False
+                                    break
+                                else:
+                                    if last_volume != float(configer['Generals']['music-volume']):
+                                        last_volume = float(configer['Generals']['music-volume'])
+                                        music.mixer.music.set_volume(last_volume)
+                                    time.sleep(2)
+
+                    t = threading.Thread(target=musicPlaying)
+                    t.start()
 
         elif cmd == "VA_PAUSE_MUSIC":
             if music.playing:
